@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    <title>Job List</title>
+{% endblock title %}
+
+{% block content %}
+    <h1 style="text-align: center; padding-top: 1em; padding-bottom: 1em;">Job Information</h1>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Role</th>
+                <th scope="col">Description</th>
+                <th scope="col">city</th>
+                <th scope="col">is active</th>
+                <th scope="col">Start Date</th>
+                <th scope="col">End Date</th>
+                <th scope="col">Application</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for jobpost in jobpost %}
+                <tr>
+                    <th scope="row">{{ jobpost.role }}</th>
+                    <td>{{ jobpost.description }}</td>
+                    <td>{{ jobpost.city }}</td>
+                    <td>{{ jobpost.is_city }}</td>
+                    <td>{{ jobpost.start_date }}</td>
+                    <td>{{ jobpost.end_date }}</td>
+                    <td>
+                        <a style="margin-right: 30px;" href="{% url 'job_application' jobpost.id %}">Apply</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <!--
+    <div class="text-center">
+        <a href=""><button type="button" class="btn btn-primary">Add New Info</button></a>
+    </div> -->
+{% endblock content %}
