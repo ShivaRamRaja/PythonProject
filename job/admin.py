@@ -8,17 +8,11 @@ from .models import \
 # Register your models here.
 
 class ApplicantAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'firstname', 'secondname', 'email', 'relocation',)
-
-    search_fields = ('id', 'email',)
 
     list_filter = ('email',)
 
 
 class ApplicantExperienceAdmin(admin.ModelAdmin):
-    list_display = ('id', 'job_title', 'is_current', 'company_name', 'job_location',)
-
-    search_fields = ('id', 'job_title',)
 
     list_filter = ('company_name',)
 

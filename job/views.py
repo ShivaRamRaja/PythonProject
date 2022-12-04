@@ -1,7 +1,7 @@
 from django.shortcuts import redirect
 from django.shortcuts import render
 from django.http import HttpResponse
-from .models import JobPost
+from .models import JobPost, Applicant
 from .serializers import LoginSerializer, JobApplication, \
     JobPostSerializer, JobApplicationSerializer, ApplicantSerializer
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -93,6 +93,7 @@ class JobPostAPIViewOne(APIView):
 
 
 class JobApplicationAPIView(APIView):
+    permission_classes = [IsAuthenticated]
     renderer_classes = [TemplateHTMLRenderer]
     template_name = 'job_application.html'
     serializer_class = JobApplicationSerializer
@@ -122,7 +123,10 @@ class JobApplicationsAPIView(APIView):
     http_method_names = ['get']
 
     def get(self, request):
-        user = request.user
-        queryset = JobApplication.objects.filter(applicant=user.id)
+        try:
+            applicant = Applicant.objects.get(user=self.request.user)
+        except Applicant.DoesNotExist:
+            applicant=None
+        queryset = JobApplication.objects.filter(applicant=applicant)
         return Response({'jobapplications': queryset})
 

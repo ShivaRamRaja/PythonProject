@@ -1,5 +1,8 @@
 from datetime import datetime
 from django.db import models
+from django.core.mail import send_mail
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 
@@ -112,7 +115,7 @@ class ApplicantSkill(AbstractBase):
     )
 
     def __str__(self) -> str:
-        self.skill + self.skill_level
+        str(self.applicant) + str(self.skill_level)
 
     class Meta:
         verbose_name = 'applicant_skill'
@@ -191,3 +194,29 @@ class JobApplication(AbstractBase):
         verbose_name_plural = 'jobapplications'
         ordering = ("created_at", "-updated_at")
         db_table = 'jobapplication'
+
+
+@receiver(post_save, sender=JobApplication)
+def send_notification_on_job_application(sender, instance, created, **kwargs):
+    """A post  save signal to send an email once a job application has been created. """
+
+    #New order has been created.
+    if created:
+        message = f'We have received your application for {instance.jobpost.role}. Thank you. All the best'
+        send_mail(
+            'New Job Application',
+            message,
+            'xyz@gmail.com',
+            [instance.applicant.user.email]
+        )
+
+    else:
+        if instance.status == 'accepted' or instance.status == 'rejected':
+            message = f'Your job application has been updated'
+            send_mail(
+                'Job Application Updated',
+                message,
+                'xyz@gmail.com',
+                [instance.applicant.user.email]
+            )
+
