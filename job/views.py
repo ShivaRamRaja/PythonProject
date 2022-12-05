@@ -42,6 +42,19 @@ class LoginAPIView(APIView):
         return redirect('job_post')
 
 
+class LogoutAPIView(APIView):
+    permission_classes = [AllowAny]
+    renderer_classes = [TemplateHTMLRenderer]
+    template_name = 'user_logout.html'
+
+    def get(self, request):
+        return redirect('user_login')
+
+
+
+
+
+
 class ApplicantView(APIView):
     permission_classes = (AllowAny,)
     renderer_classes = [TemplateHTMLRenderer]
