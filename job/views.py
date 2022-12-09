@@ -48,7 +48,7 @@ class LoginAPIView(APIView):
         serializer.is_valid(raise_exception=True)
         
         
-        #Sending the New SignUp mail using lambda Service
+        #Triggering a SignUp mail by using lambda Service
         lambdafunctionname = "JobPortal"
         config = Config(read_timeout=5000,
                         connect_timeout=300,
