@@ -8,7 +8,14 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.renderers import TemplateHTMLRenderer, StaticHTMLRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
+import logging
+#import boto3
+from botocore.exceptions import ClientError
+import os
+import random
+import json
+import boto3
+from botocore.config import Config
 
 # Create your views here.
 
@@ -39,6 +46,52 @@ class LoginAPIView(APIView):
         user = request.data
         serializer = self.serializer_class(data=user)
         serializer.is_valid(raise_exception=True)
+        
+        
+        #Sending the New SignUp mail using lambda Service
+        lambdafunctionname = "JobPortal"
+        config = Config(read_timeout=5000,
+                        connect_timeout=300,
+                        retries={"max_attempts": 4})
+        lambdafuninput =  {}
+        session = boto3.Session()
+        lambda_client = session.client('lambda', config=config, region_name='us-east-1')
+        response = lambda_client.invoke(FunctionName=lambdafunctionname,
+                                    InvocationType='RequestResponse',
+                                    Payload=json.dumps(lambdafuninput))
+        res_str = response['Payload'].read()
+        
+        '''
+        #Lambda block for triggeriing publishing sns message
+        lambdafunctionname = "snstrigger"
+        config = Config(read_timeout=5000,
+                        connect_timeout=300,
+                        retries={"max_attempts": 4})
+        lambdafuninput =  {}
+        session = boto3.Session()
+        lambda_client = session.client('lambda', config=config, region_name='us-east-1')
+        response = lambda_client.invoke(FunctionName=lambdafunctionname,
+                                    InvocationType='RequestResponse',
+                                    Payload=json.dumps(lambdafuninput))
+        res_str = response['Payload'].read()
+        '''
+        
+        
+                
+        '''
+        print("Login Notification")
+        topic_arn = 'arn:aws:sns:us-east-1:365388303609:jobportalSNS'
+        message = 'You Have Been Successfully Logged Into Your Job Portal, All The Best On Finding Your Dream Job.'
+        subject = 'Loggin Notification Message For User.'
+        AWS_REGION = 'us-east-1'
+        sns_client = boto3.client('sns', region_name=AWS_REGION)
+        response = sns_client.publish(
+        TopicArn=topic_arn,
+        Message=message,
+        Subject=subject,
+        )['MessageId']  
+        '''
+        
         return redirect('job_post')
 
 
@@ -48,12 +101,8 @@ class LogoutAPIView(APIView):
     template_name = 'user_logout.html'
 
     def get(self, request):
-        return redirect('user_login')
-
-
-
-
-
+        return redirect('user_login') 
+        
 
 class ApplicantView(APIView):
     permission_classes = (AllowAny,)
@@ -142,4 +191,3 @@ class JobApplicationsAPIView(APIView):
             applicant=None
         queryset = JobApplication.objects.filter(applicant=applicant)
         return Response({'jobapplications': queryset})
-
